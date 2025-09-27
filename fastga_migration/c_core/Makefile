@@ -2,20 +2,38 @@ CC = gcc
 CFLAGS = -O3 -Wall -Wextra -fPIC -std=c99
 LDFLAGS = -shared
 
-TARGET = libfastga.so
-STATIC_TARGET = libfastga.a
+# Utility functions library
+UTIL_TARGET = libfastga.so
+UTIL_STATIC = libfastga.a
+UTIL_SOURCES = libfastga.c
+UTIL_OBJECTS = $(UTIL_SOURCES:.c=.o)
 
-SOURCES = libfastga.c
-OBJECTS = $(SOURCES:.c=.o)
+# Full FastGA library
+FULL_TARGET = libfastga_full.so
+FULL_STATIC = libfastga_full.a
+FULL_SOURCES = fastga_full.c
+FULL_OBJECTS = $(FULL_SOURCES:.c=.o)
+
+# All targets
+TARGET = $(UTIL_TARGET) $(FULL_TARGET)
+STATIC_TARGET = $(UTIL_STATIC) $(FULL_STATIC)
+SOURCES = $(UTIL_SOURCES) $(FULL_SOURCES)
+OBJECTS = $(UTIL_OBJECTS) $(FULL_OBJECTS)
 
 .PHONY: all clean test
 
 all: $(TARGET) $(STATIC_TARGET)
 
-$(TARGET): $(OBJECTS)
+$(UTIL_TARGET): $(UTIL_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(STATIC_TARGET): $(OBJECTS)
+$(UTIL_STATIC): $(UTIL_OBJECTS)
+	ar rcs $@ $^
+
+$(FULL_TARGET): $(FULL_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(FULL_STATIC): $(FULL_OBJECTS)
 	ar rcs $@ $^
 
 %.o: %.c
