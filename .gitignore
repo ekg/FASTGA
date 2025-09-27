@@ -1,0 +1,38 @@
+# Build artifacts
+target/
+*.o
+*.so
+*.a
+
+# Migration status
+migration_status.json
+
+# Test data
+*.fa.gz
+*.paf
+*.paf.png
+*.1gdb
+*.bps
+*.log
+
+# Compiled binaries
+ALNchain
+ALNplot
+ALNreset
+ALNshow
+ALNtoPAF
+ALNtoPSL
+FAtoGDB
+FastGA
+FastKS
+GDBshow
+GDBstat
+GDBtoFA
+GIXcp
+GIXmake
+GIXmv
+GIXrm
+GIXshow
+ONEview
+PAFtoALN
+PAFtoPSL
