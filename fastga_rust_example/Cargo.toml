@@ -1,0 +1,36 @@
+[package]
+name = "fastga"
+version = "0.1.0"
+edition = "2021"
+authors = ["FASTGA Contributors"]
+description = "Fast genome aligner using adaptive k-mer matching"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+rayon = "1.8"
+crossbeam = "0.8"
+memmap2 = "0.9"
+thiserror = "1.0"
+anyhow = "1.0"
+indicatif = "0.17"
+log = "0.4"
+env_logger = "0.11"
+flate2 = "1.0"
+byteorder = "1.5"
+dashmap = "5.5"
+parking_lot = "0.12"
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.4"
+tempfile = "3.9"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+
+[[bench]]
+name = "kmer_index"
+harness = false
