@@ -2,46 +2,137 @@
 
 ## Current Status: Systematic C to Rust Migration
 
-We're rewriting FASTGA in Rust using a incremental migration strategy where we replace C functions one-by-one while maintaining a working system at all times. Both implementations are tested side-by-side to ensure identical behavior.
+We're rewriting FASTGA in Rust using an incremental "Ship of Theseus" migration strategy where we replace C functions one-by-one while maintaining a working system at all times. Both implementations are tested side-by-side to ensure identical behavior.
+
+### Branch: `rewrite`
+
+All migration work is happening on the `rewrite` branch:
+```bash
+git checkout rewrite
+```
 
 ### Migration Framework Location
 ```
 fastga_migration/
 ├── c_core/          # C functions exported via FFI
+│   ├── libfastga.h  # FFI-friendly function signatures
+│   ├── libfastga.c  # C implementations
+│   └── Makefile     # Build shared library
 ├── rust_core/       # Rust implementations
-├── tests/           # Comparison tests
-└── migrate.py       # Migration tracker
+│   ├── src/
+│   │   ├── ffi.rs   # C FFI bindings
+│   │   ├── native.rs # Pure Rust implementations
+│   │   ├── tests.rs  # Side-by-side comparison tests
+│   │   └── lib.rs    # Main library with Config switching
+│   ├── build.rs     # Build script for C integration
+│   └── Cargo.toml   # Rust dependencies
+└── migrate.py       # Migration tracker script
 ```
+
+### How It Works
+
+1. **Dual Implementation**: Every function exists in both C and Rust
+2. **Configuration Switching**: A `Config` struct controls which implementation is used
+3. **Test Harness**: The `test_both!` macro runs tests with both C and Rust, asserting identical results
+4. **Incremental Migration**: Functions are migrated one at a time, with full testing at each step
 
 ### How to Use
 
-1. **Check migration progress:**
+1. **Initial Setup:**
+   ```bash
+   cd fastga_migration
+
+   # Build C library
+   cd c_core
+   make clean && make
+
+   # Build and test Rust
+   cd ../rust_core
+   cargo test
+   ```
+
+2. **Check migration progress:**
    ```bash
    cd fastga_migration
    python3 migrate.py progress
    ```
 
-2. **Migrate next function:**
+   Output shows:
+   ```
+   FASTGA Migration Progress
+   ============================================================
+   Total functions: 11
+   Migrated:       1 (9.1%)
+
+   Function                       Status
+   --------------------------------------------------
+   encode_2bit                    ✅ Migrated
+   decode_2bit                    ⏳ Pending
+   ...
+   ```
+
+3. **Migrate next function:**
    ```bash
    python3 migrate.py next
    ```
 
-3. **Run all tests:**
+   This will:
+   - Run tests for the next unmigrated function
+   - Verify C and Rust produce identical output
+   - Mark function as migrated if tests pass
+   - Update configuration to use Rust version
+
+4. **Run all tests:**
    ```bash
    cd rust_core
    cargo test
    ```
 
-4. **Build and test specific function:**
+   All 23 tests compare C and Rust implementations
+
+5. **Test specific function:**
    ```bash
    cargo test test_encode_2bit
    ```
 
-### Migration Status
-- ✅ Framework established
-- ✅ All functions have dual C/Rust implementations
-- ✅ Test harness validates equivalence
-- 🔄 Migrating function by function
+### Migration Progress
+
+| Function | Status | Notes |
+|----------|--------|-------|
+| encode_2bit | ✅ Migrated | First function successfully migrated |
+| decode_2bit | ⏳ Pending | |
+| encode_kmer | ⏳ Pending | |
+| decode_kmer | ⏳ Pending | |
+| kmer_reverse_complement | ⏳ Pending | |
+| hash_kmer | ⏳ Pending | |
+| score_match | ⏳ Pending | |
+| edit_distance | ⏳ Pending | |
+| gc_content | ⏳ Pending | |
+| count_bases | ⏳ Pending | |
+| reverse_complement_seq | ⏳ Pending | |
+
+### Key Files to Review
+
+1. **Test Harness**: `rust_core/src/tests.rs` - See how C/Rust equivalence is tested
+2. **Migration Config**: `rust_core/src/lib.rs` - Config struct that switches implementations
+3. **Native Rust**: `rust_core/src/native.rs` - Pure Rust implementations
+4. **FFI Bindings**: `rust_core/src/ffi.rs` - Safe wrappers around C functions
+
+### Why This Approach?
+
+1. **Never Broken**: System works at every commit - we always have a functioning genome aligner
+2. **Verifiable**: Every function tested against C original for bit-identical results
+3. **Incremental**: Can stop/resume migration anytime without breaking anything
+4. **Safe**: Get Rust's memory safety benefits immediately for migrated functions
+5. **Measurable**: Clear progress tracking with migration script
+
+### Next Steps
+
+1. Continue migrating functions one by one using `migrate.py next`
+2. After all functions migrated, remove C dependencies
+3. Integrate with main FASTGA codebase
+4. Add Rust-specific optimizations (SIMD, better parallelism)
+5. Benchmark against C version
 
 ---
 
