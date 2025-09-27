@@ -97,19 +97,28 @@ fastga_migration/
 
 ### Migration Progress
 
-| Function | Status | Notes |
-|----------|--------|-------|
-| encode_2bit | ✅ Migrated | First function successfully migrated |
-| decode_2bit | ⏳ Pending | |
-| encode_kmer | ⏳ Pending | |
-| decode_kmer | ⏳ Pending | |
-| kmer_reverse_complement | ⏳ Pending | |
-| hash_kmer | ⏳ Pending | |
-| score_match | ⏳ Pending | |
-| edit_distance | ⏳ Pending | |
-| gc_content | ⏳ Pending | |
-| count_bases | ⏳ Pending | |
-| reverse_complement_seq | ⏳ Pending | |
+#### Utility Functions (COMPLETED ✅)
+These 11 helper functions have been migrated and tested:
+- encode_2bit, decode_2bit, encode_kmer, decode_kmer
+- kmer_reverse_complement, hash_kmer
+- score_match, edit_distance
+- gc_content, count_bases, reverse_complement_seq
+
+#### REAL FastGA Functions (0% Complete)
+The actual genome aligner consists of ~17,000 lines of C code:
+
+| Component | Functions | Status | Est. Lines |
+|-----------|-----------|--------|------------|
+| gene_core | 9 | ⏳ 0/9 | ~500 |
+| GDB (genome database) | 6 | ⏳ 0/6 | ~2,000 |
+| Alignment algorithms | 6 | ⏳ 0/6 | ~6,000 |
+| K-mer index | 4 | ⏳ 0/4 | ~2,000 |
+| Merge/Match | 2 | ⏳ 0/2 | ~1,500 |
+| Output (PAF/PSL) | 2 | ⏳ 0/2 | ~1,000 |
+| Main pipeline | 1 | ⏳ 0/1 | ~2,000 |
+| **TOTAL** | **30** | **⏳ 0/30** | **~15,000** |
+
+**Reality Check**: We migrated utility functions, not the actual aligner. The real work starts now!
 
 ### Key Files to Review
 
