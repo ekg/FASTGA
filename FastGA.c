@@ -1539,7 +1539,6 @@ static void *old_merge_thread(void *args)
 }
 
 #ifdef DEBUG_MERGE
-#endif
 
 static char dna[4] = { 'a', 'c', 'g', 't' };
 
@@ -1609,6 +1608,8 @@ char *Current_Cachmer(Kmer_Stream *S, uint8 *csuf, char *seq)
 
   return (seq);
 }
+
+#endif
 
 
 static void *new_self_merge_thread(void *args)
@@ -4065,9 +4066,10 @@ static int la_merge(TP *parm)
     cpath = getcwd(NULL,0);
 
     of = open_Aln_Write(Catenate(ONE_PATH,"/",ONE_ROOT,".1aln"), 1,
-                        Prog_Name, VERSION, Command_Line,TSPACE,
-                        &parm->gdb1, SELF ? NULL : &parm->gdb2,
-                        db1_name, db2_name, cpath);
+                        Prog_Name, VERSION, Command_Line, TSPACE, db1_name, db2_name, cpath);
+    Write_Aln_Skeleton(of,&parm->gdb1);
+    if (!SELF)
+      Write_Aln_Skeleton(of,&parm->gdb2);
 
     free(cpath);
     if (db2_name != NULL)
@@ -4095,7 +4097,7 @@ static int la_merge(TP *parm)
         ovl_reload(src,bsize);
 
       Write_Aln_Overlap (of, ov);
-      Write_Aln_Trace (of, src->ptr, tsize, trace64);
+      Write_Aln_Trace (of, src->ptr, tsize, trace64, 0);
 
       src->ptr += tsize;
       if (src->ptr >= src->top)

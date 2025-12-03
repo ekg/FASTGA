@@ -146,7 +146,7 @@ void *gen_psl(void *args)
   aoff = 0;
   for (acontig = -1; beg < end; beg++)
     { Read_Aln_Overlap(in,ovl);
-      path->tlen  = Read_Aln_Trace(in,(uint8 *) trace);
+      path->tlen  = Read_Aln_Trace(in,(uint8 *) trace, NULL);
       path->trace = trace;
 
       Decompress_TraceTo16(ovl);
@@ -466,11 +466,13 @@ int main(int argc, char *argv[])
     pwd   = PathTo(argv[1]);
     root  = Root(argv[1],".1aln");
     input = open_Aln_Read(Catenate(pwd,"/",root,".1aln"),NTHREADS,&novl,&TSPACE,
-                          NULL,NULL,&src1_name,&src2_name,&cpath);
+                          &src1_name,&src2_name,&cpath);
     if (input == NULL)
       exit (1);
     free(root);
     free(pwd);
+
+    Skip_Aln_Skeletons(input);
 
     ISTWO = (src2_name != NULL);
 

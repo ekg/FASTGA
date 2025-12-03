@@ -669,7 +669,7 @@ void *gen_1aln(void *args)
           ovl->path.aepos = C->apos;
           ovl->path.diffs = tps->diff;
           Write_Aln_Overlap(of,ovl);
-          Write_Aln_Trace(of,tps->trace,tps->tlen,trace64);
+          Write_Aln_Trace(of,tps->trace,tps->tlen,trace64,0);
 
           if (*C->cptr == '\0')
             break;
@@ -904,17 +904,16 @@ int main(int argc, char *argv[])
 
     cpath = getcwd(NULL,0);
 
-    if (ISTWO)
-      of = open_Aln_Write(Catenate(APATH,"/",AROOT,".1aln"),NTHREADS,Prog_Name,
-                     VERSION,Command_Line,TSPACE,gdb1,gdb2,SPATH1,SPATH2,cpath);
-    else
-      of = open_Aln_Write(Catenate(APATH,"/",AROOT,".1aln"),NTHREADS,Prog_Name,
-                     VERSION,Command_Line,TSPACE,gdb1,NULL,SPATH1,SPATH2,cpath);
-
+    of = open_Aln_Write(Catenate(APATH,"/",AROOT,".1aln"),NTHREADS,Prog_Name,
+                                 VERSION,Command_Line,TSPACE,SPATH1,SPATH2,cpath);
     free(cpath);
     free(SPATH1);
+
+    Write_Aln_Skeleton(of,gdb1);
     if (ISTWO)
-      free(SPATH2);
+      { Write_Aln_Skeleton(of,gdb2);
+        free(SPATH2);
+      }
 
     for (p = 0; p < NTHREADS; p++)
       { parm[p].beg   = (state.st_size * p) / NTHREADS;

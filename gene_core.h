@@ -5,27 +5,6 @@
 #include <stdio.h>
 #include <time.h>
 
-//  For interactive applications where it is inappropriate to simply exit with an error
-//    message to standard error, define the constant INTERACTIVE.  If set, then error
-//    messages are put in the global variable Ebuffer and the caller of a core routine
-//    can decide how to deal with the error.
-
-#ifdef INTERACTIVE
-
-#define EPRINTF sprintf
-#define EPLACE  Ebuffer
-#define EXIT(x) return (x)
-
-extern char Ebuffer[];
-
-#else // BATCH
-
-#define EPRINTF fprintf
-#define EPLACE  stderr
-#define EXIT(x) exit (1)
-
-#endif
-
 /*******************************************************************************************
  *
  *  MY STANDARD TYPE DECLARATIONS
@@ -48,6 +27,8 @@ typedef double             float64;
  *  MACROS TO HELP PARSE COMMAND LINE
  *
  ********************************************************************************************/
+
+extern char *Error_Buffer;   //  If non-NULL place error messages here
 
 extern char *Prog_Name;   //  Name of program, available everywhere
 
@@ -74,6 +55,7 @@ extern char *Command_Line;   //  Name of program, available everywhere
     *c = '\0';							\
   }								\
 								\
+  Error_Buffer = NULL;  	        			\
   Prog_Name = Strdup(name,"");          			\
   for (i = 0; i < 128; i++)             			\
     flags[i] = 0;
@@ -121,6 +103,22 @@ extern char *Command_Line;   //  Name of program, available everywhere
 
 /*******************************************************************************************
  *
+ *  ERROR HANDLING
+ *
+ ********************************************************************************************/
+
+#define EXIT(x)			\
+{ if (Error_Buffer == NULL)	\
+    exit (1);			\
+  return (x);			\
+}
+
+int EPRINTF(char *format, ...);
+int WPRINTF(char *format, ...);
+
+
+/*******************************************************************************************
+ *
  *  MEMORY ALLOCATION,FILE HANDLING, AND PRETTY PRINTING UTILITIES
  *
  ********************************************************************************************/
@@ -143,8 +141,9 @@ char *Root(char *path, char *suffix);    // Return the root name, excluding suff
 char *Catenate(char *path, char *sep, char *root, char *suffix);
 char *Numbered_Suffix(char *left, int num, char *right);
 
-void Print_Number(int64 num, int width, FILE *out);   //  Print readable big integer
-int  Number_Digits(int64 num);                        //  Return # of digits in printed number
+void Print_Number(int64 num, int width, FILE *out);       //  Print readable big integer
+int  Number_To_String(int64 num, int width, char *where); //  Place # at where, return # of chars
+int  Number_Digits(int64 num);                            //  Return # of digits in printed number
 
 /*******************************************************************************************
  *
